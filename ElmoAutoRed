@@ -1,0 +1,227 @@
+/* Copyright (c) 2017 FIRST. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted (subject to the limitations in the disclaimer below) provided that
+ * the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this list
+ * of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of FIRST nor the names of its contributors may be used to endorse or
+ * promote products derived from this software without specific prior written permission.
+ *
+ * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+ * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.firstinspires.ftc.teamcode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.LightSensor;
+
+import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
+//Red
+
+/**
+ * This file illustrates the concept of driving up to a line and then stopping.
+ * It uses the common Pushbot hardware class to define the drive on the robot.
+ * The code is structured as a LinearOpMode
+ *
+ * The code shows using two different light sensors:
+ *   The Primary sensor shown in this code is a legacy NXT Light sensor (called "sensor_light")
+ *   Alternative "commented out" code uses a MR Optical Distance Sensor (called "sensor_ods")
+ *   instead of the LEGO sensor.  Chose to use one sensor or the other.
+ *
+ *   Setting the correct WHITE_THRESHOLD value is key to stopping correctly.
+ *   This should be set half way between the light and dark values.
+ *   These values can be read on the screen once the OpMode has been INIT, but before it is STARTED.
+ *   Move the senso on asnd off the white line and not the min and max readings.
+ *   Edit this code to make WHITE_THRESHOLD half way between the min and max.
+ *
+ * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
+ * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
+ */
+
+@Autonomous(name="ElmoAutoRed", group="ElmoAutoRed")
+public class ElmoAutoRed extends LinearOpMode {
+    //1.5 seconds of spinning at 0.75 = 2 ft.
+    Elmo robot = new Elmo();
+    private ElapsedTime runtime = new ElapsedTime();
+
+    static final double FORWARD_SPEED = -0.5;
+    static final double REVERSE_SPEED = 0.5;
+    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
+    static final double     WHEEL_DIAMETER_INCHES   = 3.5 ;     // For figuring circumference
+    static final double APPROACH_SPEED = 0.5;
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double     DRIVE_SPEED             = -0.6;
+    static final double     TURN_SPEED              = 0.5;
+    @Override
+    public void runOpMode() {
+
+        /* Initialize the drive system variables.
+         * The init() method of the hardware class does all the work here
+         */
+        robot.init(hardwareMap);
+
+        telemetry.addData("Autonomous Mode Status", "Ready to Run");
+        telemetry.update();
+
+        waitForStart();
+
+        //Go towards the block
+        robot.leftFront.setPower(FORWARD_SPEED);
+        robot.leftBack.setPower(FORWARD_SPEED);
+        robot.rightFront.setPower(FORWARD_SPEED);
+        robot.rightBack.setPower(FORWARD_SPEED);
+        runtime.reset();
+
+        while (opModeIsActive()){
+            encoderDrive(DRIVE_SPEED, -48, -48, 4.0);  // S3: Forward 24 Inches with 4 Sec timeout
+            telemetry.addData("Path", "Towards Block: %2.5f S  Elapsed", runtime.seconds());
+            telemetry.update();
+        }
+
+        if (robot.squareNumber == 1) {
+            while (opModeIsActive() && (runtime.seconds() < 4.7)) {
+                telemetry.addData("Path", "Towards Square 1", runtime.seconds());
+                telemetry.update();
+                if (runtime.seconds() == 0) {
+                    runtime.reset();
+                    while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                        telemetry.addData("Path", "Shuffle Left", runtime.seconds());
+                        telemetry.update();
+                        robot.leftFront.setPower(-0.75);
+                        robot.leftBack.setPower(0.75);
+                        robot.rightFront.setPower(-0.75);
+                        robot.rightBack.setPower(0.75);
+                    }
+                }
+            }
+        }
+        if (robot.squareNumber == 2) {
+            while (opModeIsActive() && (runtime.seconds() < 6.3)) {
+                telemetry.addData("Path", "Towards Square 2", runtime.seconds());
+                telemetry.update();
+                if (runtime.seconds() == 0) {
+                    runtime.reset();
+                    while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                        telemetry.addData("Path", "Shuffle Right", runtime.seconds());
+                        telemetry.update();
+                        robot.leftFront.setPower(0.75);
+                        robot.leftBack.setPower(-0.75);
+                        robot.rightFront.setPower(0.75);
+                        robot.rightBack.setPower(-0.75);
+                    }
+                }
+            }
+        }
+        if (robot.squareNumber == 3) {
+            while (opModeIsActive() && (runtime.seconds() < 8.2)) {
+                telemetry.addData("Path", "Towards Square 3", runtime.seconds());
+                telemetry.update();
+                if (runtime.seconds() == 0) {
+                    runtime.reset();
+                    while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                        telemetry.addData("Path", "Shuffle Left", runtime.seconds());
+                        telemetry.update();
+                        robot.leftFront.setPower(-0.75);
+                        robot.leftBack.setPower(0.75);
+                        robot.rightFront.setPower(-0.75);
+                        robot.rightBack.setPower(0.75);
+                    }
+                }
+            }
+        }
+    }
+
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS) {
+        speed = 0.6;
+        int newLeftTarget;
+        int newRightTarget;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = robot.leftFront.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightTarget = robot.leftBack.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newLeftTarget = robot.rightFront.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newRightTarget = robot.rightBack.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            robot.leftFront.setTargetPosition(newLeftTarget);
+            robot.leftBack.setTargetPosition(newLeftTarget);
+            robot.rightFront.setTargetPosition(newRightTarget);
+            robot.rightBack.setTargetPosition(newRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            robot.leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            robot.leftFront.setPower((speed));
+            robot.leftBack.setPower((speed));
+            robot.rightFront.setPower((speed));
+            robot.rightBack.setPower((speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (robot.leftFront.isBusy() && robot.leftBack.isBusy() && robot.rightFront.isBusy() && robot.rightBack.isBusy())) {
+
+                // Display it for the driver.
+                telemetry.addData("Direction",  "Running speed %,.2f",speed);
+                telemetry.addData("Negative Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
+                telemetry.addData("Negative  Path2",  "Running at %7d :%7d",
+                        robot.leftFront.getCurrentPosition(),
+                        robot.leftBack.getCurrentPosition(),
+                        robot.rightFront.getCurrentPosition(),
+                        robot.rightBack.getCurrentPosition());
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            robot.leftFront.setPower(0);
+            robot.leftBack.setPower(0);
+            robot.rightFront.setPower(0);
+            robot.rightBack.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            robot.leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+}
+
