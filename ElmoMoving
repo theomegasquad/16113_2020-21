@@ -59,23 +59,23 @@ public class ElmoMoving extends LinearOpMode {
 
                 //Right Trigger makes robot go forward
 
-                    leftFront.setPower(gamepad1.left_stick_y);
-                    leftBack.setPower(gamepad1.left_stick_y);
-                    rightFront.setPower(-gamepad1.left_stick_y);
-                    rightBack.setPower(gamepad1.left_stick_y);
-                    telemetry.addData("Moving", "Backward %f", gamepad1.left_stick_y);
-                    telemetry.update();
+                leftFront.setPower(gamepad1.left_stick_y);
+                leftBack.setPower(gamepad1.left_stick_y);
+                rightFront.setPower(-gamepad1.left_stick_y);
+                rightBack.setPower(gamepad1.left_stick_y);
+                telemetry.addData("Moving", "Backward %f", gamepad1.left_stick_y);
+                telemetry.update();
                 telemetry.addData("Moving", "Backward %f", gamepad1.left_stick_y);
 
 
                 //Left Trigger makes robot go backward
 
                 //    leftFront.setPower(gamepad1.left_stick_y);
-                  //  leftBack.setPower(gamepad1.left_stick_y);
+                //  leftBack.setPower(gamepad1.left_stick_y);
                 //    rightFront.setPower(-gamepad1.left_stick_y);
-                  //  rightBack.setPower(-gamepad1.left_stick_y);
+                //  rightBack.setPower(-gamepad1.left_stick_y);
                 //    telemetry.addData("Moving", "Forward %f", gamepad1.left_stick_y);
-                  //  telemetry.update();
+                //  telemetry.update();
                 //Dpad right makes robot shuffle right
                 if (gamepad1.dpad_left) {
                     leftFront.setPower(1);
@@ -99,20 +99,21 @@ public class ElmoMoving extends LinearOpMode {
                 rightFront.setPower(-turnspeed);
                 rightBack.setPower(turnspeed);
                 //Grip and Lift Wobble Goal
-                while (gamepad2.dpad_up) {
+/*
+                if (gamepad2.dpad_up) {
                     //claw.setPosition(50);
                     wobble.setPower(-0.3);
 
                 }
                 //Release and Drop Wobble Goal
-                /*
 
-                while (gamepad2.dpad_down) {
+
+                if (gamepad2.dpad_down){
                 }
                     //claw.setPosition(20);
                     wobble.setPower(0.3);
-*/
-                }
+
+                }*/
                 while (gamepad1.a) {
                     leftFront.setPower(0.5);
                     sleep(1000);
@@ -131,7 +132,7 @@ public class ElmoMoving extends LinearOpMode {
                     shooter.setPower(-0.70);
                 }
                 // if neither of the bumpers are pressed, stop all attachments
-                else   {
+                else {
                     shooter.setPower(0);
                     carousel.setPower(0);
                     intake.setPower(0);
@@ -143,3 +144,4 @@ public class ElmoMoving extends LinearOpMode {
             }
         }
     }
+}
