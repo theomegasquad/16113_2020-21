@@ -3,20 +3,23 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "ElmoMoving", group = "")
 public class ElmoMoving extends LinearOpMode {
 
-    private DcMotor leftFront;
-    private DcMotor rightFront;
+    public DcMotor leftFront;
+    public DcMotor rightFront;
     private DcMotor leftBack;
     private DcMotor rightBack;
 
     private DcMotor intake;
-    private DcMotor carousel;
-    private DcMotor shooter;
-    private DcMotor wobble;
+    public DcMotor carousel;
+    public DcMotor shooter;
+    public DcMotor wobble;
+    DigitalChannel digitalTouch;
+    DigitalChannel digitalTouch2;
 
     private Servo claw;
 
@@ -34,7 +37,8 @@ public class ElmoMoving extends LinearOpMode {
     public void runOpMode() {
         float speed = 0.0f;
         double turnspeed = 0.0f;
-
+        digitalTouch = hardwareMap.get(DigitalChannel.class, "touch1");
+        digitalTouch2 = hardwareMap.get(DigitalChannel.class, "touch2");
         leftFront = hardwareMap.dcMotor.get("leftFront");
         rightFront = hardwareMap.dcMotor.get("rightFront");
         leftBack = hardwareMap.dcMotor.get("leftBack");
@@ -45,7 +49,7 @@ public class ElmoMoving extends LinearOpMode {
         shooter = hardwareMap.dcMotor.get("shooter");
         carousel = hardwareMap.dcMotor.get("carousel");
         claw = hardwareMap.servo.get("claw");
-
+        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         // Put initialization blocks here.
         waitForStart();
         if (opModeIsActive()) {
@@ -56,18 +60,30 @@ public class ElmoMoving extends LinearOpMode {
             rightBack.setPower(-speed);
             // Put run blocks here.
             while (opModeIsActive()) {
-
+                shooter.setPower(0);
+                carousel.setPower(0);
+                intake.setPower(0);
+                wobble.setPower(0);
+                claw.setPosition(0);
+                leftFront.setPower(0);
+                leftBack.setPower(0);
+                rightFront.setPower(0);
+                rightBack.setPower(0);
                 //Right Trigger makes robot go forward
-
-                leftFront.setPower(gamepad1.left_stick_y);
-                leftBack.setPower(gamepad1.left_stick_y);
-                rightFront.setPower(-gamepad1.left_stick_y);
-                rightBack.setPower(gamepad1.left_stick_y);
-                telemetry.addData("Moving", "Backward %f", gamepad1.left_stick_y);
-                telemetry.update();
-                telemetry.addData("Moving", "Backward %f", gamepad1.left_stick_y);
-
-
+                if (gamepad1.left_stick_y != 0) {
+                    leftFront.setPower(gamepad1.left_stick_y);
+                    leftBack.setPower(gamepad1.left_stick_y);
+                    rightFront.setPower(-gamepad1.left_stick_y);
+                    rightBack.setPower(gamepad1.left_stick_y);
+                    telemetry.addData("Moving", "%f", gamepad1.left_stick_y);
+                    telemetry.update();
+                }
+                else {
+                    leftFront.setPower(0);
+                    leftBack.setPower(0);
+                    rightFront.setPower(0);
+                    rightBack.setPower(0);
+                }
                 //Left Trigger makes robot go backward
 
                 //    leftFront.setPower(gamepad1.left_stick_y);
@@ -76,72 +92,112 @@ public class ElmoMoving extends LinearOpMode {
                 //  rightBack.setPower(-gamepad1.left_stick_y);
                 //    telemetry.addData("Moving", "Forward %f", gamepad1.left_stick_y);
                 //  telemetry.update();
-                //Dpad right makes robot shuffle right
+                //Dpad right makes robot shuffle left
                 if (gamepad1.dpad_left) {
                     leftFront.setPower(1);
                     leftBack.setPower(-1);
                     rightFront.setPower(1);
                     rightBack.setPower(1);
+                    telemetry.addData("Shuffling", "left");
+                    telemetry.update();
                 }
-                //Dpad left makes robot shuffle left
+                else {
+                    leftFront.setPower(0);
+                    leftBack.setPower(0);
+                    rightFront.setPower(0);
+                    rightBack.setPower(0);
+                }
+                //Dpad left makes robot shuffle right
                 if (gamepad1.dpad_right) {
                     leftFront.setPower(-1);
                     leftBack.setPower(1);
                     rightFront.setPower(-1);
                     rightBack.setPower(-1);
+                    telemetry.addData("Shuffling", "right");
+                    telemetry.update();
+                }
+                else {
+                    leftFront.setPower(0);
+                    leftBack.setPower(0);
+                    rightFront.setPower(0);
+                    rightBack.setPower(0);
                 }
 
                 //Left Joystick makes robot turn
-
-                turnspeed = gamepad1.left_stick_x;
-                leftFront.setPower(-turnspeed);
-                leftBack.setPower(-turnspeed);
-                rightFront.setPower(-turnspeed);
-                rightBack.setPower(turnspeed);
+                if (gamepad1.left_stick_x != 0) {
+                    turnspeed = gamepad1.left_stick_x;
+                    leftFront.setPower(-turnspeed);
+                    leftBack.setPower(-turnspeed);
+                    rightFront.setPower(-turnspeed);
+                    rightBack.setPower(turnspeed);
+                    telemetry.addData("Turning", "left or right");
+                    telemetry.update();
+                }
+                else {
+                    leftFront.setPower(0);
+                    leftBack.setPower(0);
+                    rightFront.setPower(0);
+                    rightBack.setPower(0);
+                }
                 //Grip and Lift Wobble Goal
-/*
-                if (gamepad2.dpad_up) {
-                    //claw.setPosition(50);
-                    wobble.setPower(-0.3);
 
+                telemetry.update();
+                if (gamepad2.dpad_down && digitalTouch.getState() == true) {
+                    //claw.setPosition(50);
+                    wobble.setPower(-0.2);
+                    telemetry.addData("Moving", "wobble goal down");
+                    telemetry.update();
+                }
+                else {
+                    wobble.setPower(0);
                 }
                 //Release and Drop Wobble Goal
 
 
-                if (gamepad2.dpad_down){
-                }
-                    //claw.setPosition(20);
-                    wobble.setPower(0.3);
+                if(gamepad2.dpad_up && digitalTouch2.getState() == true){
 
-                }*/
-                while (gamepad1.a) {
+                    //claw.setPosition(20);
+                    wobble.setPower(0.2);
+                    telemetry.addData("Moving", "wobble goal up");
+                    telemetry.update();
+                }
+                else {
+                    wobble.setPower(0);
+                }
+                /*if(gamepad1.a){
                     leftFront.setPower(0.5);
                     sleep(1000);
                     leftFront.setPower(0);
-                }
+                }*/
                 //Suck in ring with right bumper
                 if (gamepad2.right_bumper) {
                     carousel.setPower(0.75);
                     intake.setPower(-0.5);
-                    telemetry.addData("Moving", "Attachment");
+                    telemetry.addData("Moving", "intake and carousel");
                     telemetry.update();
                 }
-                shooter.setPower(gamepad2.right_trigger);
+                else {
+                    carousel.setPower(0);
+                    intake.setPower(0);
+                }
+                //shooter.setPower(gamepad2.right_trigger);
                 //Shoot with Left Bumper
                 if (gamepad2.left_bumper) {
                     shooter.setPower(-0.70);
+                    telemetry.addData("Moving", "shooter");
+                    telemetry.update();
                 }
-                // if neither of the bumpers are pressed, stop all attachments
                 else {
                     shooter.setPower(0);
-                    carousel.setPower(0);
-                    intake.setPower(0);
-                    wobble.setPower(0);
-                    claw.setPosition(0);
+
                 }
-                telemetry.update();
-                sleep(100);
+
+                // if neither of the bumpers are pressed, stop all attachments
+
+
+
+                //telemetry.update();
+                //sleep(100);
             }
         }
-    }
-}
+    }}
