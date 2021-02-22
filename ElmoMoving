@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 @TeleOp(name = "ElmoMoving", group = "")
 public class ElmoMoving extends LinearOpMode {
@@ -20,6 +21,8 @@ public class ElmoMoving extends LinearOpMode {
     public DcMotor wobble;
     DigitalChannel digitalTouch;
     DigitalChannel digitalTouch2;
+    TouchSensor touch1;
+    TouchSensor touch2;
 
     private Servo claw;
 
@@ -37,8 +40,8 @@ public class ElmoMoving extends LinearOpMode {
     public void runOpMode() {
         float speed = 0.0f;
         double turnspeed = 0.0f;
-        digitalTouch = hardwareMap.get(DigitalChannel.class, "touch1");
-        digitalTouch2 = hardwareMap.get(DigitalChannel.class, "touch2");
+        //digitalTouch = hardwareMap.get(DigitalChannel.class, "touch1");
+        //digitalTouch2 = hardwareMap.get(DigitalChannel.class, "touch2");
         leftFront = hardwareMap.dcMotor.get("leftFront");
         rightFront = hardwareMap.dcMotor.get("rightFront");
         leftBack = hardwareMap.dcMotor.get("leftBack");
@@ -49,7 +52,10 @@ public class ElmoMoving extends LinearOpMode {
         shooter = hardwareMap.dcMotor.get("shooter");
         carousel = hardwareMap.dcMotor.get("carousel");
         claw = hardwareMap.servo.get("claw");
-        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
+
+        touch1 = hardwareMap.get(TouchSensor.class, "touch1");
+        touch2 = hardwareMap.get(TouchSensor.class, "touch2");
+        //digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         // Put initialization blocks here.
         waitForStart();
         if (opModeIsActive()) {
@@ -60,15 +66,6 @@ public class ElmoMoving extends LinearOpMode {
             rightBack.setPower(-speed);
             // Put run blocks here.
             while (opModeIsActive()) {
-                shooter.setPower(0);
-                carousel.setPower(0);
-                intake.setPower(0);
-                wobble.setPower(0);
-                claw.setPosition(0);
-                leftFront.setPower(0);
-                leftBack.setPower(0);
-                rightFront.setPower(0);
-                rightBack.setPower(0);
                 //Right Trigger makes robot go forward
                 if (gamepad1.left_stick_y != 0) {
                     leftFront.setPower(gamepad1.left_stick_y);
@@ -84,14 +81,7 @@ public class ElmoMoving extends LinearOpMode {
                     rightFront.setPower(0);
                     rightBack.setPower(0);
                 }
-                //Left Trigger makes robot go backward
 
-                //    leftFront.setPower(gamepad1.left_stick_y);
-                //  leftBack.setPower(gamepad1.left_stick_y);
-                //    rightFront.setPower(-gamepad1.left_stick_y);
-                //  rightBack.setPower(-gamepad1.left_stick_y);
-                //    telemetry.addData("Moving", "Forward %f", gamepad1.left_stick_y);
-                //  telemetry.update();
                 //Dpad right makes robot shuffle left
                 if (gamepad1.dpad_left) {
                     leftFront.setPower(1);
@@ -142,7 +132,7 @@ public class ElmoMoving extends LinearOpMode {
                 //Grip and Lift Wobble Goal
 
                 telemetry.update();
-                if (gamepad2.dpad_down && digitalTouch.getState() == true) {
+                if (gamepad2.dpad_down && touch1.isPressed()) {
                     //claw.setPosition(50);
                     wobble.setPower(-0.2);
                     telemetry.addData("Moving", "wobble goal down");
@@ -154,7 +144,7 @@ public class ElmoMoving extends LinearOpMode {
                 //Release and Drop Wobble Goal
 
 
-                if(gamepad2.dpad_up && digitalTouch2.getState() == true){
+               if(gamepad2.dpad_up && touch2.isPressed()){
 
                     //claw.setPosition(20);
                     wobble.setPower(0.2);
@@ -164,15 +154,10 @@ public class ElmoMoving extends LinearOpMode {
                 else {
                     wobble.setPower(0);
                 }
-                /*if(gamepad1.a){
-                    leftFront.setPower(0.5);
-                    sleep(1000);
-                    leftFront.setPower(0);
-                }*/
                 //Suck in ring with right bumper
                 if (gamepad2.right_bumper) {
                     carousel.setPower(0.75);
-                    intake.setPower(-0.5);
+                    intake.setPower(-0.6);
                     telemetry.addData("Moving", "intake and carousel");
                     telemetry.update();
                 }
@@ -183,21 +168,32 @@ public class ElmoMoving extends LinearOpMode {
                 //shooter.setPower(gamepad2.right_trigger);
                 //Shoot with Left Bumper
                 if (gamepad2.left_bumper) {
-                    shooter.setPower(-0.70);
+                    shooter.setPower(-0.75);
                     telemetry.addData("Moving", "shooter");
                     telemetry.update();
                 }
-                else {
+                if (!gamepad2.left_bumper) {
                     shooter.setPower(0);
-
+                }
+                //Shoot with x from dot
+                if (gamepad2.x) {
+                    shooter.setPower(-0.85);
+                    telemetry.addData("Moving", "shooter from dot");
+                    telemetry.update();
+                }
+                if (!gamepad2.x) {
+                    shooter.setPower(0);
+                }
+                //Shoot with y for power shots from line
+                if (gamepad2.y) {
+                    shooter.setPower(-0.67);
+                    telemetry.addData("Moving", "shooter for power shots");
+                    telemetry.update();
+                }
+                if (!gamepad2.y) {
+                    shooter.setPower(0);
                 }
 
-                // if neither of the bumpers are pressed, stop all attachments
-
-
-
-                //telemetry.update();
-                //sleep(100);
             }
         }
     }}
