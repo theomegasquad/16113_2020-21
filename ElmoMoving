@@ -32,6 +32,9 @@ public class ElmoMoving extends LinearOpMode {
     private final float robotSpeedClaw = 0.15f;
     private final float robotSpeedArm = 0.14f;
 
+    double  MIN_POSITION = 0, MAX_POSITION = 1;
+
+
 
     /**
      * This function is executed when this Op Mode is selected from the Driver Station.
@@ -71,7 +74,7 @@ public class ElmoMoving extends LinearOpMode {
                     leftFront.setPower(gamepad1.left_stick_y);
                     leftBack.setPower(gamepad1.left_stick_y);
                     rightFront.setPower(-gamepad1.left_stick_y);
-                    rightBack.setPower(gamepad1.left_stick_y);
+                    rightBack.setPower(-gamepad1.left_stick_y);
                     telemetry.addData("Moving", "%f", gamepad1.left_stick_y);
                     telemetry.update();
                 }
@@ -87,7 +90,7 @@ public class ElmoMoving extends LinearOpMode {
                     leftFront.setPower(1);
                     leftBack.setPower(-1);
                     rightFront.setPower(1);
-                    rightBack.setPower(1);
+                    rightBack.setPower(-1);
                     telemetry.addData("Shuffling", "left");
                     telemetry.update();
                 }
@@ -95,14 +98,14 @@ public class ElmoMoving extends LinearOpMode {
                     leftFront.setPower(0);
                     leftBack.setPower(0);
                     rightFront.setPower(0);
-                    rightBack.setPower(0);
+                    rightBack.setPower(-0);
                 }
                 //Dpad left makes robot shuffle right
                 if (gamepad1.dpad_right) {
                     leftFront.setPower(-1);
                     leftBack.setPower(1);
                     rightFront.setPower(-1);
-                    rightBack.setPower(-1);
+                    rightBack.setPower(1);
                     telemetry.addData("Shuffling", "right");
                     telemetry.update();
                 }
@@ -119,7 +122,7 @@ public class ElmoMoving extends LinearOpMode {
                     leftFront.setPower(-turnspeed);
                     leftBack.setPower(-turnspeed);
                     rightFront.setPower(-turnspeed);
-                    rightBack.setPower(turnspeed);
+                    rightBack.setPower(-turnspeed);
                     telemetry.addData("Turning", "left or right");
                     telemetry.update();
                 }
@@ -132,64 +135,109 @@ public class ElmoMoving extends LinearOpMode {
                 //Grip and Lift Wobble Goal
 
                 telemetry.update();
-                if (gamepad2.dpad_up && touch1.isPressed()) {
+                if (gamepad2.dpad_up && touch2.isPressed()) {
                     //claw.setPosition(50);
                     wobble.setPower(0);
                     telemetry.addData("Moving", "wobble goal up");
                     telemetry.update();
                 }
-                if (gamepad2.dpad_up && !(touch1.isPressed())) {
-                    wobble.setPower(-0.2);
+                if (gamepad2.dpad_up && !(touch2.isPressed())) {
+                    wobble.setPower(0.2);
                 }
 
                 //Release and Drop Wobble Goal
-                if (gamepad2.dpad_down && touch2.isPressed()) {
+                if (gamepad2.dpad_down && touch1.isPressed()) {
                     //claw.setPosition(50);
                     wobble.setPower(0);
                     telemetry.addData("Moving", "wobble goal down");
                     telemetry.update();
                 }
-                if (gamepad2.dpad_down && !(touch2.isPressed())) {
-                    wobble.setPower(0.2);
+                if (gamepad2.dpad_down && !(touch1.isPressed())) {
+                    wobble.setPower(-0.2);
                 }
                 //Suck in ring with right bumper
                 if (gamepad2.right_bumper) {
-                    carousel.setPower(0.76543210);
+                    carousel.setPower(1);
                     intake.setPower(-0.6);
                     telemetry.addData("Moving", "intake and carousel");
                     telemetry.update();
                 }
-                else {
+
+                else if(gamepad2.left_trigger > 0.9){
+                    carousel.setPower(1);
+                    telemetry.addData("Moving", "carousel");
+                    telemetry.update();
+                }
+
+                else if(gamepad2.right_trigger > 0.9){
+                    intake.setPower(-0.6);
+                    telemetry.addData("Moving", "intake");
+                    telemetry.update();
+                }
+                else if ((gamepad2.right_trigger < 0.9 && gamepad2.left_trigger < 0.9 && gamepad2.right_bumper) == false) {
                     carousel.setPower(0);
                     intake.setPower(0);
                 }
+
+
                 //shooter.setPower(gamepad2.right_trigger);
                 //Shoot with Left Bumper
                 /*if (gamepad2.left_bumper) {
                     shooter.setPower(-0.75);
                     telemetry.addData("Moving", "shooter");
                     telemetry.update();
-                }*/
+                }
                 if (!gamepad2.left_bumper) {
                     shooter.setPower(0);
-                }
+                }*/
                 //Shoot with x from dot
                 if (gamepad2.x) {
-                    shooter.setPower(-0.85);
+                    shooter.setPower(-0.75);
                     telemetry.addData("Moving", "shooter from dot");
                     telemetry.update();
                 }
-                if (!gamepad2.x) {
+                /*if (!gamepad2.x) {
                     shooter.setPower(0);
-                }
+                }*/
                 //Shoot with y for power shots from line
                 if (gamepad2.y) {
-                    shooter.setPower(-0.7350);
+                    shooter.setPower(-0.67);
                     telemetry.addData("Moving", "shooter for power shots");
                     telemetry.update();
                 }
-                if (!gamepad2.y) {
+                if (!gamepad2.y && !gamepad2.x) {
                     shooter.setPower(0);
+                }
+                if (gamepad2.dpad_left) {
+                    claw.setPosition(0);
+                }
+                if (gamepad2.dpad_right) {
+                    claw.setPosition(1);
+                }
+
+                if (gamepad2.dpad_down && !(touch1.isPressed())) {
+                    wobble.setPower(-0.2);
+                    telemetry.addData("Moving", "touch1");
+                    telemetry.update();
+                } else if ((gamepad2.dpad_down && touch1.isPressed()) || (touch1.isPressed())) {
+                    wobble.setPower(0);
+                }
+                if (gamepad2.dpad_up && !(touch2.isPressed())) {
+                    wobble.setPower(0.2);
+                    telemetry.addData("Moving", "touch2");
+                    telemetry.update();
+                } else if ((gamepad2.dpad_down && touch2.isPressed()) || (touch2.isPressed())) {
+                    wobble.setPower(0);
+                }
+                if(gamepad2.dpad_right) {
+                    claw.setPosition(MIN_POSITION);
+                    telemetry.addData("Claw", claw.getPosition()+ " " + MIN_POSITION);
+                    telemetry.update();
+                }
+                if(gamepad2.dpad_left) {
+                    claw.setPosition(MAX_POSITION);
+                    telemetry.addData("Claw", claw.getPosition() + " " + MAX_POSITION);
+                    telemetry.update();
                 }
 
             }
